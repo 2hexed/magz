@@ -1,0 +1,103 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+magz
+magz-*
+
+# Test binaries and coverage
+*_test
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Build output
+bin/
+pkg/
+dist/
+
+# Dependency directories
+vendor/
+
+# Environment files
+.env
+.env.*
+*.local
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Editor-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Go module cache
+.cache/
+go.work
+go.work.sum
+
+# IDE/Editor specific files
+.project
+.settings/
+.history
+.metals/
+.bloop/
+
+# Logs and temporary files
+log/
+logs/
+tmp/
+temp/
+*.log
+*.tmp
+*.bak
+*.backup
+*.orig
+
+# Project specific files
+magz.config.json
+!magz.config.example.json
+go.*
+
+# Air (hot reload)
+tmp/
+.air.toml
+
+# Testing
+testdata/
+test-library/
+
+# Documentation builds
+docs/_build/
+site/
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Linux
+.directory
+.Trash-*
+
+# Windows
+$RECYCLE.BIN/
+Desktop.ini

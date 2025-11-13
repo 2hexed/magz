@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Magz Viewer</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/viewer.css" />
+  </head>
+
+  <body>
+    <div class="toolbar">
+      <button onclick="history.back()">← Back</button>
+      <div class="title" id="magTitle">Loading...</div>
+      <div style="width: 78px"></div>
+    </div>
+
+    <div class="viewer-wrap">
+      <div class="canvas" id="canvas">
+        <div class="controls">
+          <button class="nav left" id="prevBtn" aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor">
+              <path
+                d="M15 19l-7-7 7-7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+              />
+            </svg>
+          </button>
+
+          <button class="nav right" id="nextBtn" aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor">
+              <path
+                d="M9 5l7 7-7 7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+              />
+            </svg>
+          </button>
+
+          <div class="page-count" id="pageCount" aria-hidden="true"></div>
+        </div>
+
+        <!-- Container for dual pages -->
+        <div class="pages-container" id="pagesContainer">
+          <img id="pageLeft" class="page left-page" alt="left page" />
+          <img id="pageRight" class="page right-page" alt="right page" />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (async function () {
+        const params = new URLSearchParams(location.search);
+        const id = params.get("id");
+        const titleEl = document.getElementById("magTitle");
+        const pageLeft = document.getElementById("pageLeft");
+        const pageRight = document.getElementById("pageRight");
+        const pagesContainer = document.getElementById("pagesContainer");
+        const pageCountEl = document.getElementById("pageCount");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        let pages = [];
+        let idx = 0;
+        let loading = false;
+        let isDualPage = window.innerWidth > 768;
+
+        // Update dual page mode on resize
+        window.addEventListener("resize", () => {
+          const newMode = window.innerWidth > 768;
+          if (newMode !== isDualPage) {
+            isDualPage = newMode;
+            setImageForIndex(idx);
+          }
+        });
+
+        function makeUrl(p) {
+          const u = new URL(p, location.origin);
+          const page = u.searchParams.get("page");
+
+          // CBZ: Backend already gives something like "/api/media?cbz=...&page=xxx"
+          if (p.startsWith("/media?cbz")) {
+            const cbz = u.searchParams.get("cbz");
+
+            return `/media?cbz=${encodeURIComponent(cbz)}&page=${encodeURIComponent(page)}`;
+          } else if (p.startsWith("/media?cbr")) {
+            const cbr = u.searchParams.get("cbr");
+
+            return `/media?cbr=${encodeURIComponent(cbr)}&page=${encodeURIComponent(page)}`;
+          }
+
+          // Image folders: wrap normally
+          return "/media?path=" + encodeURIComponent(p);
+        }
+
+        function setCount() {
+          if (!pages.length) {
+            pageCountEl.textContent = "";
+            return;
+          }
+
+          if (isDualPage && pages.length > 1) {
+            const leftNum = idx + 1;
+            const rightNum = idx + 2;
+            if (rightNum <= pages.length) {
+              pageCountEl.textContent = `${leftNum}-${rightNum} / ${pages.length}`;
+            } else {
+              pageCountEl.textContent = `${leftNum} / ${pages.length}`;
+            }
+          } else {
+            pageCountEl.textContent = `${idx + 1} / ${pages.length}`;
+          }
+        }
+
+        function showLoading(show) {
+          pageLeft.style.opacity = show ? "0" : "1";
+          pageRight.style.opacity = show ? "0" : "1";
+        }
+
+        function setImageForIndex(i) {
+          if (!pages[i]) return;
+          loading = true;
+          showLoading(true);
+
+          const leftUrl = makeUrl(pages[i]);
+          let loadedCount = 0;
+          const totalToLoad = isDualPage && pages[i + 1] ? 2 : 1;
+
+          function onImageLoad() {
+            loadedCount++;
+            if (loadedCount >= totalToLoad) {
+              loading = false;
+              setTimeout(() => {
+                pageLeft.style.opacity = "1";
+                if (isDualPage && pages[i + 1]) {
+                  pageRight.style.opacity = "1";
+                }
+              }, 40);
+            }
+          }
+
+          function onImageError(url) {
+            loadedCount++;
+            if (loadedCount >= totalToLoad) {
+              loading = false;
+              pageLeft.style.opacity = "1";
+              pageRight.style.opacity = "1";
+            }
+          }
+
+          // Load left page
+          pageLeft.onload = onImageLoad;
+          pageLeft.onerror = () => onImageError(leftUrl);
+          pageLeft.src = leftUrl;
+
+          // Load right page if in dual mode
+          if (isDualPage && pages[i + 1]) {
+            const rightUrl = makeUrl(pages[i + 1]);
+            pageRight.onload = onImageLoad;
+            pageRight.onerror = () => onImageError(rightUrl);
+            pageRight.src = rightUrl;
+            pageRight.style.display = "block";
+            pagesContainer.classList.add("has-two-pages");
+            pagesContainer.classList.remove("single-page");
+          } else {
+            pageRight.style.display = "none";
+            pageRight.src = "";
+            pagesContainer.classList.remove("has-two-pages");
+            pagesContainer.classList.add("single-page");
+          }
+
+          setCount();
+
+          // Preload next pages
+          if (isDualPage) {
+            if (pages[i + 2]) {
+              const p = new Image();
+              p.src = makeUrl(pages[i + 2]);
+            }
+            if (pages[i + 3]) {
+              const p = new Image();
+              p.src = makeUrl(pages[i + 3]);
+            }
+          } else {
+            if (pages[i + 1]) {
+              const p = new Image();
+              p.src = makeUrl(pages[i + 1]);
+            }
+          }
+        }
+
+        function prev() {
+          if (loading) return;
+          const step = isDualPage ? 2 : 1;
+          if (idx > 0) {
+            idx = Math.max(0, idx - step);
+            setImageForIndex(idx);
+          }
+        }
+
+        function next() {
+          if (loading) return;
+          const step = isDualPage ? 2 : 1;
+          if (idx < pages.length - 1) {
+            idx = Math.min(pages.length - 1, idx + step);
+            setImageForIndex(idx);
+          }
+        }
+
+        prevBtn.addEventListener("click", prev);
+        nextBtn.addEventListener("click", next);
+
+        // keyboard
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft") prev();
+          if (e.key === "ArrowRight") next();
+        });
+
+        // swipe handling
+        let startX = 0,
+          startY = 0,
+          moved = false;
+        const threshold = 40;
+        const restraint = 75;
+        const allowedTime = 500;
+        let startTime = 0;
+
+        const canvas = document.getElementById("canvas");
+        canvas.addEventListener(
+          "touchstart",
+          function (e) {
+            const t = e.changedTouches[0];
+            startX = t.pageX;
+            startY = t.pageY;
+            startTime = Date.now();
+            moved = false;
+          },
+          { passive: true },
+        );
+
+        canvas.addEventListener(
+          "touchmove",
+          function (e) {
+            moved = true;
+          },
+          { passive: true },
+        );
+
+        canvas.addEventListener(
+          "touchend",
+          function (e) {
+            const t = e.changedTouches[0];
+            const distX = t.pageX - startX;
+            const distY = t.pageY - startY;
+            const elapsed = Date.now() - startTime;
+            if (
+              Math.abs(distX) >= threshold &&
+              Math.abs(distY) <= restraint &&
+              elapsed <= allowedTime
+            ) {
+              if (distX < 0) next();
+              else prev();
+            }
+          },
+          { passive: true },
+        );
+
+        // load pages from /api/pages?id=...
+        try {
+          const resp = await fetch("/api/pages?id=" + encodeURIComponent(id));
+          if (!resp.ok) throw new Error("pages request failed: " + resp.status);
+          const data = await resp.json();
+
+          if (Array.isArray(data)) pages = data;
+          else if (Array.isArray(data.pages)) pages = data.pages;
+          else {
+            titleEl.textContent = "No pages";
+            return;
+          }
+
+          if (pages.length === 0) {
+            titleEl.textContent = "No pages";
+            return;
+          }
+
+          // set title by fetching library info if available
+          try {
+            const lib = await fetch("/api/library");
+            if (lib.ok) {
+              const all = await lib.json();
+              const entry = all.find((x) => String(x.id) === String(id));
+              if (entry)
+                titleEl.textContent = entry.title || entry.path || "Magazine";
+              else titleEl.textContent = "Magazine";
+            }
+          } catch (_) {
+            titleEl.textContent = "Magazine";
+          }
+
+          idx = 0;
+          setCount();
+          setImageForIndex(idx);
+        } catch (err) {
+          console.error(err);
+          titleEl.textContent = "Failed to load pages";
+        }
+      })();
+    </script>
+  </body>
+</html>
