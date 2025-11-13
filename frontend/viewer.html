@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="theme-color"
+      content="#c9622f"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#141210"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Magz — Reader</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/viewer.css" />
+  </head>
+
+  <body>
+    <!-- Toolbar -->
+    <div class="toolbar" role="banner">
+      <button class="btn-back" id="backBtn" aria-label="Back to library">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Library
+      </button>
+      <div class="title" id="magTitle" role="heading" aria-level="1">
+        Loading…
+      </div>
+      <div class="toolbar-spacer" aria-hidden="true"></div>
+    </div>
+
+    <!-- Main viewer -->
+    <div class="viewer-wrap" role="main">
+      <div class="canvas" id="canvas">
+        <!-- Nav controls -->
+        <div class="controls" aria-hidden="true">
+          <button class="nav left" id="prevBtn" disabled>
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+          <button class="nav right" id="nextBtn" disabled>
+            <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18" /></svg>
+          </button>
+          <div
+            class="page-count"
+            id="pageCount"
+            aria-live="polite"
+            aria-label="Page indicator"
+          ></div>
+        </div>
+
+        <!-- Dual page container -->
+        <div class="pages-container" id="pagesContainer">
+          <img id="pageLeft" class="page left-page" alt="Left page" />
+          <img id="pageRight" class="page right-page" alt="Right page" />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        /* ── DOM refs ── */
+        const params = new URLSearchParams(location.search);
+        const id = params.get("id");
+        const titleEl = document.getElementById("magTitle");
+        const pageLeft = document.getElementById("pageLeft");
+        const pageRight = document.getElementById("pageRight");
+        const pagesContainer = document.getElementById("pagesContainer");
+        const pageCountEl = document.getElementById("pageCount");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const canvas = document.getElementById("canvas");
+        const backBtn = document.getElementById("backBtn");
+
+        /* ── State ── */
+        let pages = [];
+        let idx = 0;
+        let loading = false;
+        let isDual = window.innerWidth > 768;
+
+        /* ── Back navigation ── */
+        backBtn.addEventListener("click", () => history.back());
+
+        /* ── Debounced resize ── */
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            const newDual = window.innerWidth > 768;
+            if (newDual !== isDual) {
+              isDual = newDual;
+              setPage(idx);
+            }
+          }, 120);
+        });
+
+        /* ── URL builder ── */
+        function pageUrl(p) {
+          if (p.includes("/media?cbz=") || p.startsWith("/media?cbz")) {
+            const u = new URL(p, location.origin);
+            const cbz = u.searchParams.get("cbz");
+            const pg = u.searchParams.get("page");
+            return (
+              "/media?cbz=" +
+              encodeURIComponent(cbz) +
+              "&page=" +
+              encodeURIComponent(pg)
+            );
+          }
+          if (p.includes("/media?cbr=") || p.startsWith("/media?cbr")) {
+            const u = new URL(p, location.origin);
+            const cbr = u.searchParams.get("cbr");
+            const pg = u.searchParams.get("page");
+            return (
+              "/media?cbr=" +
+              encodeURIComponent(cbr) +
+              "&page=" +
+              encodeURIComponent(pg)
+            );
+          }
+          return "/media?path=" + encodeURIComponent(p);
+        }
+
+        /* ── Page counter text ── */
+        function updateCount() {
+          if (!pages.length) {
+            pageCountEl.textContent = "";
+            return;
+          }
+          if (isDual && pages[idx + 1]) {
+            pageCountEl.textContent =
+              idx + 1 + "–" + (idx + 2) + " / " + pages.length;
+          } else {
+            pageCountEl.textContent = idx + 1 + " / " + pages.length;
+          }
+        }
+
+        /* ── Nav button states ── */
+        function updateButtons() {
+          prevBtn.disabled = idx === 0;
+          nextBtn.disabled = isDual
+            ? idx >= pages.length - 1
+            : idx >= pages.length - 1;
+        }
+
+        /* ── Load and show a spread ── */
+        function setPage(i) {
+          if (!pages[i]) return;
+          loading = true;
+          canvas.classList.add("loading");
+
+          /* Remove loaded class so image fades in again */
+          pageLeft.classList.remove("loaded");
+          pageRight.classList.remove("loaded");
+
+          const hasRight = isDual && Boolean(pages[i + 1]);
+          let done = 0;
+          const needed = hasRight ? 2 : 1;
+
+          function onLoad(imgEl) {
+            imgEl.classList.add("loaded");
+            done++;
+            if (done >= needed) {
+              loading = false;
+              canvas.classList.remove("loading");
+            }
+          }
+
+          /* Left page */
+          pageLeft.onload = () => onLoad(pageLeft);
+          pageLeft.onerror = () => onLoad(pageLeft);
+          pageLeft.src = pageUrl(pages[i]);
+
+          /* Right page */
+          if (hasRight) {
+            pageRight.onload = () => onLoad(pageRight);
+            pageRight.onerror = () => onLoad(pageRight);
+            pageRight.src = pageUrl(pages[i + 1]);
+            pageRight.style.display = "";
+            pagesContainer.classList.add("has-two-pages");
+            pagesContainer.classList.remove("single-page");
+          } else {
+            pageRight.src = "";
+            pageRight.style.display = "none";
+            pagesContainer.classList.remove("has-two-pages");
+            pagesContainer.classList.add("single-page");
+          }
+
+          updateCount();
+          updateButtons();
+
+          /* Preload next spread */
+          const preloadFrom = hasRight ? i + 2 : i + 1;
+          for (
+            let k = preloadFrom;
+            k < Math.min(preloadFrom + 4, pages.length);
+            k++
+          ) {
+            const p = new Image();
+            p.src = pageUrl(pages[k]);
+          }
+        }
+
+        /* ── Navigation ── */
+        function prev() {
+          if (loading || idx === 0) return;
+          idx = Math.max(0, idx - (isDual ? 2 : 1));
+          setPage(idx);
+        }
+
+        function next() {
+          if (loading || idx >= pages.length - 1) return;
+          idx = Math.min(pages.length - 1, idx + (isDual ? 2 : 1));
+          setPage(idx);
+        }
+
+        prevBtn.addEventListener("click", prev);
+        nextBtn.addEventListener("click", next);
+
+        /* ── Keyboard ── */
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft" || e.key === "PageUp") prev();
+          if (e.key === "ArrowRight" || e.key === "PageDown") next();
+          if (e.key === "Escape") history.back();
+        });
+
+        /* ── Touch / swipe ── */
+        let touchX = 0,
+          touchY = 0,
+          touchT = 0;
+        canvas.addEventListener(
+          "touchstart",
+          (e) => {
+            const t = e.changedTouches[0];
+            touchX = t.pageX;
+            touchY = t.pageY;
+            touchT = Date.now();
+          },
+          { passive: true },
+        );
+
+        canvas.addEventListener(
+          "touchend",
+          (e) => {
+            const t = e.changedTouches[0];
+            const dx = t.pageX - touchX;
+            const dy = t.pageY - touchY;
+            const dt = Date.now() - touchT;
+            if (Math.abs(dx) > 42 && Math.abs(dy) < 80 && dt < 500) {
+              if (dx < 0) next();
+              else prev();
+            }
+          },
+          { passive: true },
+        );
+
+        /* ── Bootstrap ── */
+        (async function load() {
+          if (!id) {
+            titleEl.textContent = "No item selected";
+            return;
+          }
+
+          try {
+            const resp = await fetch("/api/pages?id=" + encodeURIComponent(id));
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+            const data = await resp.json();
+
+            pages = Array.isArray(data)
+              ? data
+              : Array.isArray(data.pages)
+                ? data.pages
+                : [];
+
+            if (!pages.length) {
+              titleEl.textContent = "No pages found";
+              return;
+            }
+
+            /* Title lookup */
+            try {
+              const libResp = await fetch("/api/library");
+              if (libResp.ok) {
+                const all = await libResp.json();
+                const entry = all.find((x) => String(x.id) === String(id));
+                titleEl.textContent = entry
+                  ? entry.title || "Magazine"
+                  : "Magazine";
+                document.title = "Magz — " + titleEl.textContent;
+              }
+            } catch (_) {
+              titleEl.textContent = "Magazine";
+            }
+
+            idx = 0;
+            setPage(idx);
+          } catch (err) {
+            console.error(err);
+            titleEl.textContent = "Failed to load";
+          }
+        })();
+      })();
+    </script>
+  </body>
+</html>

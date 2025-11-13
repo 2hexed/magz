@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Your personal magazine, book &amp; comic reader"
+    />
+    <meta
+      name="theme-color"
+      content="#c9622f"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#141210"
+      media="(prefers-color-scheme: dark)"
+    />
+    <!-- Preconnect for Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Magz — Library</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+
+  <body>
+    <div class="page-wrapper">
+      <header>
+        <h1>Magz</h1>
+        <div class="header-right">
+          <span class="lib-count" id="libCount" aria-live="polite"></span>
+          <div class="search-box" id="searchBox" role="search">
+            <!-- Search icon -->
+            <svg
+              class="search-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="Search…"
+              aria-label="Search your library"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <!-- Clear button -->
+            <button
+              class="search-clear"
+              id="searchClear"
+              aria-label="Clear search"
+              type="button"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div
+          id="library"
+          class="grid"
+          role="list"
+          aria-label="Magazine library"
+          aria-live="polite"
+        ></div>
+      </main>
+    </div>
+
+    <script src="/script.js"></script>
+  </body>
+</html>

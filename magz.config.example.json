@@ -1,0 +1,8 @@
+{
+    "Port": 8082,
+    "AutoRefreshInterval": 10,
+    "LibraryPaths": ["/home/n/Books", "/home/n/Comics", "/home/n/Magazines"],
+    "CacheDB": "magz_cache.db",
+    "MaxThumbnailSize": 400,
+    "LogLevel": "info"
+}
