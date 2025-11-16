@@ -314,3 +314,4 @@ Please include:
 |   OK   | UI themes and dark mode               |
 |  TODO  | Optional metadata editing and tagging |
 |   OK   | Comic archive support                 |
+|  TODO  | Systemd unit and Docker file          |
