@@ -22,6 +22,27 @@ and serves a simple web app UI for browsing and reading right in your browser.
 - 💿 Uses SQLite for local caching
 - 🧩 Nix shell for easy development and reproducibility
 
+## How to organize
+
+```
+/hom/n/Books/ < (Books is a new Directory in my case)
+├── Death to Pachuco < (Magazine/Comic Category ie., Directory name)
+│   └── Death to Pachuco 001.cbz < (Magazine/Comic Title ie., Exact filename - Death to Pachuco 001)
+├── Misc < (Magazine/Comic Category)
+│   └── My Own Comic < (Magazine/Comic Title ie., Exact filename)
+│       ├── 001.png
+│       ├── 002.png
+│       └── *.png
+├── Playboy < (Magazine/Comic Category ie., Directory name)
+│   └── Best Ones So far < (Magazine/Comic Title ie., Exact filename)
+│       ├── 183887_001.jpg
+│       ├── 183887_002.jpg
+│       ├── 183887_003.jpg
+│       └──*.jpg
+└── Batman < (Magazine/Comic Category ie., Directory name)
+    └── Batman #1 (1940-2011).cbr < (Magazine/Comic Title ie., Exact filename)
+```
+
 ## 🧰 Requirements
 
 - Go **1.22+**
@@ -72,18 +93,18 @@ Inside the shell, you’ll see a welcome message and have access to these helper
 
 Magz implements several security measures:
 
-- **Path Validation**: All file access is validated against configured library paths
-- **Query Parameter Sanitization**: URL parameters are properly escaped
-- **No Directory Listing**: Only explicitly cataloged content is accessible
-- **Read-Only Access**: The application only reads files, never writes or modifies them
-- **Connection Timeouts**: HTTP server has configured timeouts to prevent resource exhaustion
+1. **Path Validation**: All file access is validated against configured library paths
+1. **Query Parameter Sanitization**: URL parameters are properly escaped
+1. **No Directory Listing**: Only explicitly cataloged content is accessible
+1. **Read-Only Access**: The application only reads files, never writes or modifies them
+1. **Connection Timeouts**: HTTP server has configured timeouts to prevent resource exhaustion
 
 ### Best Practices
 
-- Run Magz on localhost only (don't expose to the internet without proper authentication)
-- Use specific library paths rather than root directories
-- Keep your Go version updated for security patches
-- Regularly review your library paths configuration
+1. Run Magz on localhost only (don't expose to the internet without proper authentication)
+1. Use specific library paths rather than root directories
+1. Keep your Go version updated for security patches
+1. Regularly review your library paths configuration
 
 ## 🧾 Configuration
 
