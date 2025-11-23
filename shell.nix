@@ -57,6 +57,7 @@ pkgs.mkShell {
   ]);
 
   shellHook = ''
+    export GOPATH=$PWD
     echo "------------------------------------"
     echo "🐹 Go Media Server development shell"
     echo "To start: go run main.go"
