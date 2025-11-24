@@ -24,8 +24,8 @@ and serves a simple web app UI for browsing and reading right in your browser.
 
 ## How to organize
 
-```
-/hom/n/Books/ < (Books is a new Directory in my case)
+```bash
+/home/n/Books/ < (Books is a new Directory in my case)
 ├── Death to Pachuco < (Magazine/Comic Category ie., Directory name)
 │   └── Death to Pachuco 001.cbz < (Magazine/Comic Title ie., Exact filename - Death to Pachuco 001)
 ├── Misc < (Magazine/Comic Category)
