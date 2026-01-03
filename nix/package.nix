@@ -10,7 +10,7 @@ pkgs.buildGoModule {
     owner = "2hexed";
     repo = "magz";
     rev = "master";
-    hash = "sha256-kxiZ3GC5xPcHgMyaU0++Yc07uLbFX76e0csvSaK+usM=";
+    hash = "sha256-mTF/YEDtbCRphTVLs2KPevyXYa1Ag7W7Tjhe6IlbQSk=";
   };
 
   vendorHash = pkgs.lib.fakeHash;
