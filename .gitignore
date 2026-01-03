@@ -76,7 +76,6 @@ temp/
 # Project specific files
 magz.config.json
 !magz.config.example.json
-go.*
 
 # Air (hot reload)
 tmp/

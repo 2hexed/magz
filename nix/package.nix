@@ -10,10 +10,10 @@ pkgs.buildGoModule {
     owner = "2hexed";
     repo = "magz";
     rev = "master";
-    hash = "sha256-mTF/YEDtbCRphTVLs2KPevyXYa1Ag7W7Tjhe6IlbQSk=";
+    hash = "sha256-PaiYjK811QEOzQ1opZC2s6Dr1z/wX4mA9X0zyGXvDek=";
   };
 
-  vendorHash = pkgs.lib.fakeHash;
+  vendorHash = pkgs.lib.fakeHash; # "sha256-PaiYjK811QEOzQ1opZC2s6Dr1z/wX4mA9X0zyGXvDek=";
 
   meta = with pkgs.lib; {
     description = "A simple Go project";
