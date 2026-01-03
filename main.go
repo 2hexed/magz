@@ -1019,7 +1019,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Static files
-	frontendFS, _ := fs.Sub(embeddedFiles, "frontend")
+	frontendFS, _ := fs.Sub(frontendContent, "frontend")
 	fs := http.FileServer(http.FS(frontendFS))
 	mux.Handle("/", fs)
 
