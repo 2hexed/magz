@@ -1,7 +1,7 @@
 package main
 
 import (
-	"embed"
+	"embed" // for embedding frontend
 	"bytes"
 	"context"
 	"database/sql"
@@ -12,6 +12,7 @@ import (
 	_ "image/gif"
 	"image/jpeg"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"net/url"
@@ -34,7 +35,7 @@ import (
 )
 
 //go:embed frontend/*
-var staticFiles embed.FS
+var frontendContent embed.FS
 
 // Config represents application configuration
 type Config struct {
@@ -1018,7 +1019,8 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Static files
-	fs := http.FileServer(http.Dir("frontend"))
+	frontendFS, _ := fs.Sub(embeddedFiles, "frontend")
+	fs := http.FileServer(http.FS(frontendFS))
 	mux.Handle("/", fs)
 
 	// API endpoints
