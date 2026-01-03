@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"bytes"
 	"context"
 	"database/sql"
@@ -31,6 +32,9 @@ import (
 
 	"github.com/nwaples/rardecode"
 )
+
+//go:embed frontend/*
+var staticFiles embed.FS
 
 // Config represents application configuration
 type Config struct {
@@ -1014,7 +1018,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Static files
-	fs := http.FileServer(http.Dir("public"))
+	fs := http.FileServer(http.Dir("frontend"))
 	mux.Handle("/", fs)
 
 	// API endpoints
