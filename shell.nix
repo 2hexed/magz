@@ -4,7 +4,7 @@
 
 let
   project-cleanup = pkgs.writeShellScriptBin "project-cleanup" ''
-    rm -r magz go.mod go.sum magz_cache.db *.exe *.out *.log magz.config.json .DS_Store *.tmp *.bak pkg/ .vscode/ .idea/
+    rm -fr magz magz_cache.db *.exe *.out *.log magz.config.json .DS_Store *.tmp *.bak pkg/ .vscode/ .idea/
   '';
 
   first-time-running = pkgs.writeShellScriptBin "first-time-running" ''
@@ -65,6 +65,6 @@ pkgs.mkShell {
     echo "> first-time-running"
     echo ""
     echo "Building binary? Execute below"
-    echo "> buildbin"
+    echo "> build-binary"
   '';
 }
