@@ -1,10 +1,8 @@
 # Magz
 
-**Not your usual local magazine/book/comic reader.**
+Not your usual local magazine/book/comic reader. Get a copy of your favorite magazines, books, or comics and read them in your browser.
 
 ![Go Version](https://img.shields.io/badge/Go-1.22%2B-00ADD8?logo=go)
-![License](https://img.shields.io/badge/license-%20%20GNU%20GPLv3%20-green)
-![Status](https://img.shields.io/badge/Status-Beta-orange)
 ![Nix](https://img.shields.io/badge/Nix-Enabled-blue?logo=nixos)
 
 ## 📖 Overview
@@ -25,7 +23,7 @@ and serves a simple web app UI for browsing and reading right in your browser.
 ## How to organize
 
 ```bash
-/home/n/Books/ < (Books is a new Directory in my case)
+/home/nelly/Books/ < (Books is a new Directory in my case)
 ├── Death to Pachuco < (Magazine/Comic Category ie., Directory name)
 │   └── Death to Pachuco 001.cbz < (Magazine/Comic Title ie., Exact filename - Death to Pachuco 001)
 ├── Misc < (Magazine/Comic Category)
@@ -87,7 +85,10 @@ Inside the shell, you’ll see a welcome message and have access to these helper
 
 ### Option 3: Directly from Releases
 
-> TODO
+- Download the latest release from the [releases page](https://github.com/2hexed/magz/releases)
+- Extract the binary
+- Create your config file
+- Run the binary
 
 ## 🔒 Security
 
